@@ -22,7 +22,7 @@ jobs:
           key: jars-{{ checksum "build.gradle" }}-{{ checksum  "app/build.gradle" }}
       - run:
           name: Run Tests
-            - emulator -avd circleci-android22 -no-audio -no-window:
+          command: - emulator -avd circleci-android22 -no-audio -no-window:
           command: ./gradlew connectedAndroidTest -PdisablePreDex
           test:
                 override:
