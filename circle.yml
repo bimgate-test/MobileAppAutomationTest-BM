@@ -22,7 +22,7 @@ jobs:
       TERM: dumb
 
     steps:
-      - checkout
+   #   - checkout
 
       # Download and cache dependencies
       - restore_cache:
