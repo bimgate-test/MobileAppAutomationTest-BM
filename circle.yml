@@ -23,7 +23,7 @@ jobs:
       - run:
           name: Run Tests
 #          command: ./gradlew lint test
-          - emulator -avd circleci-android22 -no-audio -no-window:
+      - emulator -avd circleci-android22 -no-audio -no-window:
           background: true
           parallel: false
           # wait for it to have booted
