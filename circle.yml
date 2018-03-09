@@ -1,45 +1,50 @@
-#
-# Build configuration for Circle CI
-#
-
-general:
-    artifacts:
-        - /home/ubuntu/MobileAppAutomationTest-BM/app/build/outputs/apk/
-
-machine:
+version: 2
+jobs:
+  build:
+    working_directory: ~/code
+    docker:
+      - image: circleci/android:api-25-alpha
     environment:
-        ANDROID_HOME: /usr/local/android-sdk-linux
-
-#dependencies:
-#    override:
-#        - sudo chmod +x gradlew
-#        - sudo ANDROID_HOME=/usr/local/android-sdk-linux ./gradlew dependencies
-#        - echo y | android update sdk --no-ui --all --filter tools,platform-tools,android-23,extra-android-m2repository,extra-google-m2repository,extra-google-google_play_services,extra-android-support
-#        - echo y | android update sdk --no-ui --all --filter build-tools-23.0.3
-
-test:
-  override:
-
-      - sudo chmod +x ./gradlew
-      # perform unit tests
-      - ./gradlew lint test
-      # Save test reports
-      - mkdir -p $CIRCLE_TEST_REPORTS/reports/unit-tests
-      - cp -avr app/build/reports/tests/mockDebug/ $CIRCLE_TEST_REPORTS/reports/unit-tests
-      - mkdir -p $CIRCLE_TEST_REPORTS/junit/
-      - find . -type f -regex ".*/build/test-results/mockDebug/.*xml" -exec cp {} $CIRCLE_TEST_REPORTS/junit/ \;
-
+      JVM_OPTS: -Xmx3200m
+    steps:
+      - checkout
+      - restore_cache:
+          key: jars-{{ checksum "build.gradle" }}-{{ checksum  "app/build.gradle" }}
+      - run:
+         name: Chmod permissions #if permission for Gradlew Dependencies fail, use this.
+         command: sudo chmod +x ./gradlew
+      - run:
+          name: Download Dependencies
+          command: ./gradlew androidDependencies
+      - save_cache:
+          paths:
+            - ~/.gradle
+          key: jars-{{ checksum "build.gradle" }}-{{ checksum  "app/build.gradle" }}
+      - run: gradlew test
+#          name: Run Tests
+#          command: ./gradlew lint test
+      - store_artifacts:
+          path: app/build/reports
+          destination: reports
+      - store_test_results:
+          path: app/build/test-results
+    test:
+      override:
       # start the emulator
       - emulator -avd circleci-android22 -no-audio -no-window:
           background: true
-          parallel: true
-      # wait for it to have booted
+          parallel: false
+          # wait for it to have booted
       - circle-android wait-for-boot
-      # unlock the emulator screen
+          # unlock the emulator screen
       - sleep 30
       - adb shell input keyevent 82
-      # run tests against the emulator.
+          # run tests  against the emulator.
       - ./gradlew connectedAndroidTest -PdisablePreDex
-      # Copying the test reports
-      - mkdir -p $CIRCLE_TEST_REPORTS/reports/functional-tests
-      - cp -avr app/build/reports/androidTests/connected/flavors/MOCK/ $CIRCLE_TEST_REPORTS/reports/functional-tests
+          # copy the build outputs to artifacts
+      - cp -r app/build/outputs $CIRCLE_ARTIFACTS
+          # copy the test results to the test results directory.
+      - cp -r app/build/outputs/androidTest-results/* $CIRCLE_TEST_REPORTS
+
+
+
