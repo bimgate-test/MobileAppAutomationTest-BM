@@ -12,4 +12,7 @@ test:
 
   override:
     # run tests against the emulator.
+    - run:
+      name: Chmod permissions #if permission for Gradlew Dependencies fail, use this.
+      command: sudo chmod +x ./gradlew
     - ./gradlew connectedAndroidTest -PdisablePreDex
