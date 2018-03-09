@@ -18,8 +18,11 @@ dependencies:
 test:
   override:
 
+      - run:
+         name: Chmod permissions #if permission for Gradlew Dependencies fail, use this.
+         command: sudo chmod +x ./gradlew
       # perform unit tests
-      - ./gradlew tesMockDebugUnitTest
+      - ./gradlew lint test
       # Save test reports
       - mkdir -p $CIRCLE_TEST_REPORTS/reports/unit-tests
       - cp -avr app/build/reports/tests/mockDebug/ $CIRCLE_TEST_REPORTS/reports/unit-tests
@@ -36,7 +39,7 @@ test:
       - sleep 30
       - adb shell input keyevent 82
       # run tests against the emulator.
-      - ./gradlew connectedMockDebugAndroidTest -PdisablePreDex
+      - ./gradlew connectedAndroidTest -PdisablePreDex
       # Copying the test reports
       - mkdir -p $CIRCLE_TEST_REPORTS/reports/functional-tests
       - cp -avr app/build/reports/androidTests/connected/flavors/MOCK/ $CIRCLE_TEST_REPORTS/reports/functional-tests
