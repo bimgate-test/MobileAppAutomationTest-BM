@@ -1,38 +1,64 @@
-general:
-artifacts:
-    - C:\Users\bratislav.miletic\Documents\taxi_pro\poslednje\MobileAppAutomationTest (3)\MobileAppAutomationTest-master\app\build\apk
+# Java Gradle CircleCI 2.0 configuration file
+#
+# Check https://circleci.com/docs/2.0/language-java/ for more details
+#
+version: 2
+jobs:
+  build:
+    docker:
+      # specify the version you desire here
+      - image: circleci/openjdk:8-jdk
 
-machine:
-environment:
-    ANDROID_HOME: C:\Users\bratislav.miletic\AppData\Local\Android\Sdk
+      # Specify service dependencies here if necessary
+      # CircleCI maintains a library of pre-built images
+      # documented at https://circleci.com/docs/2.0/circleci-images/
+      # - image: circleci/postgres:9.4
 
-dependencies:
-    override:
-        - echo y | android update sdk --no-ui --all --filter tools,platform-tools,android-23,extra-android-m2repository,extra-google-m2repository,extra-google-google_play_services,extra-android-support
-    - echo y | android update sdk --no-ui --all --filter build-tools-23.0.3
+    working_directory: ~/repo
 
-test:
-  override:
+    environment:
+      # Customize the JVM maximum heap limit
+      JVM_OPTS: -Xmx3200m
+      TERM: dumb
+      ANDROID_HOME: C:\Users\bratislav.miletic\AppData\Local\Android\Sdk
 
-  # perform unit tests
-  - ./gradlew tesMockDebugUnitTest
-  # Save test reports
-  - mkdir -p $CIRCLE_TEST_REPORTS/reports/unit-tests
-  - cp -avr app/build/reports/tests/mockDebug/ $CIRCLE_TEST_REPORTS/reports/unit-tests
-  - mkdir -p $CIRCLE_TEST_REPORTS/junit/
-  - find . -type f -regex ".*/build/test-results/mockDebug/.*xml" -exec cp {} $CIRCLE_TEST_REPORTS/junit/ \;
+    steps:
+      - checkout
 
-  # start the emulator
-  - emulator -avd circleci-android22 -no-audio -no-window:
-      background: true
-      parallel: true
-  # wait for it to have booted
-  - circle-android wait-for-boot
-  # unlock the emulator screen
-  - sleep 30
-  - adb shell input keyevent 82
-  # run tests against the emulator.
-  - ./gradlew connectedMockDebugAndroidTest -PdisablePreDex
-  # Copying the test reports
-  - mkdir -p $CIRCLE_TEST_REPORTS/reports/functional-tests
-  - cp -avr app/build/reports/androidTests/connected/flavors/MOCK/ $CIRCLE_TEST_REPORTS/reports/functional-tests
+      # Download and cache dependencies
+      - restore_cache:
+          keys:
+          - v1-dependencies-{{ checksum "build.gradle" }}
+          # fallback to using the latest cache if no exact match is found
+          - v1-dependencies-
+
+      - run: gradle dependencies
+
+      - save_cache:
+          paths:
+            - ~/.gradle
+          key: v1-dependencies-{{ checksum "build.gradle" }}
+
+      # run tests!
+      - run: gradle test
+
+#      test:
+#        override:
+#          # start the emulator
+#          - emulator -avd circleci-android22 -no-audio -no-window:
+#              background: true
+#              parallel: false
+#          # wait for it to have booted
+#          - circle-android wait-for-boot
+#          # unlock the emulator screen
+#          - sleep 30
+#          - adb shell input keyevent 82
+#          # run tests  against the emulator.
+#          - ./gradlew connectedAndroidTest -PdisablePreDex
+#          # copy the build outputs to artifacts
+#          - cp -r app/build/outputs $CIRCLE_ARTIFACTS
+#          # copy the test results to the test results directory.
+#          - cp -r app/build/outputs/androidTest-results/* $CIRCLE_TEST_REPORTS
+#
+
+
