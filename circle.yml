@@ -22,13 +22,14 @@ jobs:
           key: jars-{{ checksum "build.gradle" }}-{{ checksum  "app/build.gradle" }}
       - run:
           name: Run Tests
+          - emulator -avd circleci-android22 -no-audio -no-window:
           command: ./gradlew connectedAndroidTest -PdisablePreDex
           test:
                 override:
                 # start the emulator
                 - emulator -avd circleci-android22 -no-audio -no-window:
                     background: true
-                    parallel: false
+                    parallel: true
                     # wait for it to have booted
                 - circle-android wait-for-boot
                     # unlock the emulator screen
