@@ -22,7 +22,7 @@ test:
       - sudo chmod +x ./gradlew
       # perform unit tests
       - ./gradlew lint test
-      # Save test reports
+      ## Save test reports
       - mkdir -p $CIRCLE_TEST_REPORTS/reports/unit-tests
       - cp -avr app/build/test-results $CIRCLE_TEST_REPORTS/reports/unit-tests
       - mkdir -p $CIRCLE_TEST_REPORTS/junit/
