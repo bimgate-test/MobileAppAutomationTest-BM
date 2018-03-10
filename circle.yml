@@ -20,7 +20,7 @@ dependencies:
 test:
   override:
 
-#      - sudo chmod +x ./gradlew
+      - sudo chmod +x ./gradlew
       # perform unit tests
       - ./gradlew lint test
       # Save test reports
