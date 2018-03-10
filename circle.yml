@@ -13,9 +13,6 @@ machine:
 dependencies:
     override:
         - chmod +x gradlew
-##        - sudo ANDROID_HOME=/usr/local/android-sdk-linux ./gradlew dependencies
-#        - echo y | android update sdk --no-ui --all --filter tools,platform-tools,android-23,extra-android-m2repository,extra-google-m2repository,extra-google-google_play_services,extra-android-support
-#        - echo y | android update sdk --no-ui --all --filter build-tools-23.0.3
         - echo y |  android update sdk --no-ui --filter build-tools-26.0.2,android-26,extra-android-m2repository
         - echo y | android update sdk --no-ui --all --filter build-tools-26.0.2
 
@@ -27,9 +24,9 @@ test:
       - ./gradlew lint test
       # Save test reports
       - mkdir -p $CIRCLE_TEST_REPORTS/reports/unit-tests
-      - cp -avr app/build/reports/tests/mockDebug/ $CIRCLE_TEST_REPORTS/reports/unit-tests
+      - cp -avr app/build/test-results $CIRCLE_TEST_REPORTS/reports/unit-tests
       - mkdir -p $CIRCLE_TEST_REPORTS/junit/
-      - find . -type f -regex ".*/build/test-results/mockDebug/.*xml" -exec cp {} $CIRCLE_TEST_REPORTS/junit/ \;
+      - find . -type f -regex ".*/build/test-results/.*xml" -exec cp {} $CIRCLE_TEST_REPORTS/junit/ \;
 
       # start the emulator
       - emulator -avd circleci-android22 -no-audio -no-window:
@@ -44,4 +41,4 @@ test:
       - ./gradlew connectedAndroidTest -PdisablePreDex
       # Copying the test reports
       - mkdir -p $CIRCLE_TEST_REPORTS/reports/functional-tests
-      - cp -avr app/build/reports/androidTests/connected/flavors/MOCK/ $CIRCLE_TEST_REPORTS/reports/functional-tests
+      - cp -avr app/build/reports/androidTests/ $CIRCLE_TEST_REPORTS/reports/functional-tests
