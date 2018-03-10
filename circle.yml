@@ -29,7 +29,7 @@ test:
       - find . -type f -regex ".*/build/test-results/.*xml" -exec cp {} $CIRCLE_TEST_REPORTS/junit/ \;
 
       # start the emulator
-      - emulator -avd circleci-android22 -no-audio -no-window:
+      - emulator -avd circleci-android26 -no-audio -no-window:
           background: true
           parallel: true
       # wait for it to have booted
